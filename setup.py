@@ -16,6 +16,7 @@ setup(
     author="Pauli Rikula",
     url='https://github.com/kummahiih/python-category-equations',
     packages=['category_equations'],
+    python_requires='~=3.6',
     classifiers=[
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 3.6']
