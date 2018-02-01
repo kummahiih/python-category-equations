@@ -226,7 +226,7 @@ class Container(Identity):
 
 
 def from_operator(operation=debug):
-    """Category like equations in which
+    """Create category like equations for the given operator in which
 the underlaying '+' and '-' operations are basic set operations called union and discard.
 The multiplication operator '*' connects sources to sinks. The equation system also has
 a Identity 'I' and zerO 'O' terms. For futher details search 'category theory'
