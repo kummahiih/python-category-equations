@@ -1,29 +1,63 @@
 # python-category-equations
 
+
+@copyright: 2010 - 2018 by Pauli Rikula <pauli.rikula@gmail.com>
+@license: MIT <http://www.opensource.org/licenses/mit-license.php>
+
+
 Create category like equations for the given operator in which
 the underlaying '+' and '-' operations are basic set operations called union and discard.
 The multiplication operator '*' connects sources to sinks. The equation system also has
 a Identity 'I' and zerO 'O' terms. For futher details search 'category theory'
 from the Wikipedia and do your own maths.
 
-Here our connector operation is print function called 'debug'
+
+
+
+Here our connector operation is print function called 'debug' which
+prints an arrow between two objects:
 
     >>> debug('a', 'b')
     a -> b
+    
+    >>> debug('b', 'a')
+    b -> a
+    
+    >>> debug('a', 'a')
+    a -> a
 
 Get I and O singletons and class C, which use previously defined debug -function.
-
     >>> I, O, C = from_operator(debug)
-    >>> I
-    I
-    >>> O
-    O
-    >>> I * I
-    I
-    >>> O * I
-    O
-    >>> I * O
-    O
+    >>> I == I
+    True
+    >>> O == I
+    False
+    >>> C(1)
+    C(1)
+
+The items do have differing sinks and sources:
+
+    >>> I.sinks
+    {I}
+    >>> I.sources
+    {I}
+    
+    >>> O.sinks
+    set()
+    >>> O.sources
+    set()
+
+    >>> C(1).sinks
+    {1}
+    >>> C(1).sources
+    {1}
+
+
+You can write additions also with this notation
+
+    >>> C(1,2) == C(1) + C(2)
+    True
+    
 
 The multiplication connects sources to sinks like this:
 
@@ -32,39 +66,77 @@ The multiplication connects sources to sinks like this:
     1 -> 4
     2 -> 3
     2 -> 4
+    
+    >>> (C(3,4) * C(1,2)).sinks
+    {3, 4}
+    
+    >>> (C(3,4) * C(1,2)).sources
+    {1, 2}
 
-The identity I works like usual:
 
-    >>> I * C(1)
-    C(1)
+By combining the two previous examples:
 
-    >>> C(1) * I
-    C(1)
+    >>> C(1,2) * C(3,4) == (C(1) + C(2)) * (C(3) + C(4))
+    True
 
-Zero is a bit trickier:
+The order inside C(...) does not matter:
 
-    >>> C(1) * O
-    C(1)
+    >>> (C(1,2) * C(3,4)) == (C(2,1) * C(4,3))
+    True
+    
+On the other hand you can not swap the terms like:
 
-But:
+    >>> (C(1,2) * C(3,4)) == (C(3,4) * C(1,2))
+    False
 
-    >>> ((C(1) * O) * C(2)).evaluate()
+Because:
 
-See, no debug prints, no connections being made.
-The 'O' works like a terminator, if you need one.
+    >>> (C(3,4) * C(1,2)).evaluate()
+    3 -> 1
+    3 -> 2
+    4 -> 1
+    4 -> 2
+
+The discard operation works like this:
+    
+    >>> (C(3,4) * C(1,2) - C(4) * C(1)).evaluate()
+    3 -> 1
+    3 -> 2
+    4 -> 2
+
+But
+
+    >>> (C(3,4) * C(1,2) - C(4) * C(1)) == C(3) * C(1,2) + C(4) * C(2)
+    False
+
+Because sinks and sources differ:
+
+    >>> (C(3,4) * C(1,2) - C(4) * C(1)).sinks
+    {3}
+    >>> (C(3) * C(1,2) + C(4) * C(2)).sinks
+    {3, 4}
+
+The right form would have been:
+
+    >>> (C(3,4) * C(1,2) - C(4) * C(1)) == C(3) * C(1,2) + C(4) * C(2) - C(4) * O - O * C(1)
+    True
+
+    
+The identity I and zero O work together like usual:
+
+    >>> I * I == I
+    True
+    >>> O * I * O == O
+    True
+
 
 Identity 'I' works as a tool for equation simplifying.
-For example use see these two equations:
+For example:
 
-    >>> (C(1,2) * C( C(3,4), I ) * C(5)).evaluate()
-    1 -> 3
-    1 -> 4
-    1 -> 5
-    2 -> 3
-    2 -> 4
-    2 -> 5
-    3 -> 5
-    4 -> 5
+    >>> C(1,2) * C(3,4) * C(5) + C(1,2) * C(5) == C(1,2) * ( C(3,4) + I ) * C(5)
+    True
+    
+Because:
 
     >>> (C(1,2) * C(3,4) * C(5) + C(1,2) * C(5)).evaluate()
     1 -> 3
@@ -76,44 +148,44 @@ For example use see these two equations:
     3 -> 5
     4 -> 5
 
-Just some random examples more:
+and
 
-    >>> C(1) * C(2)
-    C(C(1),'*',C(2))
-
-    >>> C(0)*( C(1,2,3)*C(4,5) - C(1,2)*C(4) ) *C(6)
-    C(C(C(0),'*',C(C(C(1,2,3),'*',C(4,5)),'-',C(C(1,2),'*',C(4)))),'*',C(6))
-
-    >>> C(1,2) + C(1,4)
-    C(C(1,2),'+',C(1,4))
-
-    >>> C(1,2) - C(1,4)
-    C(C(1,2),'-',C(1,4))
-
-    >>> C(0)*( C(1,2,3)*C(4,5) - C(1,2)*C(4) ) *C(6)
-    C(C(C(0),'*',C(C(C(1,2,3),'*',C(4,5)),'-',C(C(1,2),'*',C(4)))),'*',C(6))
-
-
-    >>> (C(1,2) * C( C(I), I ) * C(5)).evaluate()
-    1 -> 5
-    2 -> 5
-
-    >>> C( C(1)* C( O * C(2), C(3), C(4) * O ) * C(5)).evaluate()
+    >>> (C(1,2) * ( C(3,4) + I ) * C(5)).evaluate()
     1 -> 3
     1 -> 4
-    2 -> 5
-    3 -> 5
-
-    >>> (C( C(1)* C( O * C(2), C(3), C(4) * O ) * C(5)) - C(1) * C(3) ).evaluate()
-    1 -> 4
-    2 -> 5
-    3 -> 5
-
-
-    >>> ( C(0)*( C(1,2,3)*C(4,5) - C(1,2)*C(4) ) *C(6)).evaluate()
-    0 -> 3
     1 -> 5
+    2 -> 3
+    2 -> 4
     2 -> 5
-    3 -> 4
     3 -> 5
-    5 -> 6
+    4 -> 5
+
+If two terms have the same middle part you can simplify equations via terminating loose sinks or sources with O:
+For example:
+    
+    >>> (C(1) * C(2) * C(4) + C(3) * C(4)).evaluate()
+    1 -> 2
+    2 -> 4
+    3 -> 4
+
+    >>> (C(1) * C(2) * C(4) + O * C(3) * C(4)).evaluate()
+    1 -> 2
+    2 -> 4
+    3 -> 4
+
+    >>> (C(1) * ( C(2) + O * C(3) ) * C(4)).evaluate()
+    1 -> 2
+    2 -> 4
+    3 -> 4
+
+    >>> C(1) * C(2) * C(4) + O * C(3) * C(4) == C(1) * ( C(2) + O * C(3) ) * C(4)
+    True
+    
+
+Note that the comparison wont work without the O -term because the sinks differ:
+
+    >>> C(1) * C(2) * C(4) +  C(3) * C(4) == C(1) * ( C(2) + O * C(3) ) * C(4)
+    False
+
+
+    
