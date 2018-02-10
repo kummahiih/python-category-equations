@@ -16,7 +16,7 @@ with open('README.md', 'wt') as readme_file:
 
 setup(
     name='python-category-equations',
-    version='0.3.0',
+    version='0.3.2',
     description='python-category-equations',
     long_description=README,
     license="MIT",

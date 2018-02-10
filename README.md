@@ -2,6 +2,7 @@
 
 
 @copyright: 2010 - 2018 by Pauli Rikula <pauli.rikula@gmail.com>
+
 @license: MIT <http://www.opensource.org/licenses/mit-license.php>
 
 
@@ -27,6 +28,7 @@ prints an arrow between two objects:
     a -> a
 
 Get I and O singletons and class C, which use previously defined debug -function.
+
     >>> I, O, C = from_operator(debug)
     >>> I == I
     True
