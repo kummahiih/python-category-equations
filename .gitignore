@@ -4,7 +4,9 @@ dist/
 *.egg-info/
 *.egg
 *.py[cod]
+*.*.py[cod]
 __pycache__/
+.vscode/
 *.so
 *~
 

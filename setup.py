@@ -6,12 +6,20 @@
 from setuptools import setup
 import category_equations
 
+README = "\n\n".join([
+    "# python-category-equations",
+    category_equations.__doc__,
+    category_equations.CategoryOperations.__doc__,
+    category_equations.from_operator.__doc__])
+
+with open('README.md', 'wt') as readme_file:
+    readme_file.write(README)
 
 setup(
     name='python-category-equations',
     version='0.2.0',
     description='python-category-equations',
-    long_description=category_equations.from_operator.__doc__,
+    long_description=README,
     license="MIT",
     author="Pauli Rikula",
     url='https://github.com/kummahiih/python-category-equations',

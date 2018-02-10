@@ -4,21 +4,25 @@
 """
 
 import copy
+import enum
+import abc
+from typing import Set, List, Callable
 
-class Freezed_fnc:
+
+class FreezedFunction:
     def __init__(self, fnc, alist=[], adict={}):
         self.fnc = fnc
         self.alist = tuple(alist)
         self.adict = tuple(adict.items())
 
     def __repr__(self):
-        return 'F %s %s' % (self.alist, self.adict)
+        return 'F(%s,%s)'% (self.alist, self.adict)
 
     def evaluate(self):
         return self.fnc(*self.alist, **dict(self.adict))
 
     def __eq__(self, other):
-        return isinstance(other, Freezed_fnc) and \
+        return isinstance(other, FreezedFunction) and \
             self.alist == other.alist and self.adict == other.adict
 
     def __hash__(self):
@@ -30,7 +34,7 @@ class Freezed_fnc:
 
 def freezed(fnc):
     def _f(*l, **d):
-        return Freezed_fnc(fnc, l, d)
+        return FreezedFunction(fnc, l, d)
     return _f
 
 def debug(a, b):
@@ -51,14 +55,55 @@ class _Set_operations:
             c.discard(key)
         return c
 
+class CategoryOperations(enum.Enum):
+    """
 
-class Identity:
-    def __init__(self, operator=None):
-        self.sources = set([self])
-        self.sinks = set([self])
-        self.operations = set([])
-        self.operator = operator
+    >>> for operation in CategoryOperations:
+    ...  print(operation.name, operation.value)
+    ADD +
+    DISCARD -
+    ARROW *
 
+    """
+    ADD = '+'
+    DISCARD = '-'
+    ARROW = '*'
+
+FreezablesSet = Set[FreezedFunction]
+
+
+class Category(metaclass=abc.ABCMeta):
+    
+    def __init__(
+            self,
+            operator: Callable=None,
+            sources: Set=None,
+            sinks: Set=None,
+            operations: FreezablesSet=None):
+            
+        if None in [operator, sources, sinks, operations]:
+            raise ValueError("These should not be none: {}".format([operator, sources, sinks, operations]))
+        self._operator = operator
+        self._sources = sources
+        self._sinks = sinks
+        self._operations = operations
+   
+    @property
+    def operator(self) -> Callable:
+        return self._operator
+   
+    @property
+    def sources(self) -> Set:
+        return self._sources
+       
+    @property
+    def sinks(self) -> Set:
+        return self._sinks
+        
+    @property
+    def operations(self) -> Set[FreezedFunction]:
+        return self._operations
+    
     def __hash__(self):
         return str(self).__hash__()
 
@@ -66,121 +111,72 @@ class Identity:
         return str(self).__lt__(str(other))
 
     def __eq__(self, other):
-        return str(self).__eq__(str(other))
+        if other is None:
+            return False
+        if not isinstance(other, Category):
+            return False
+        if self.operator != other.operator:
+            return False
+        return self.sinks == other.sinks and self.sources == other.sources and self.operations == other.operations
 
-    def is_identity(self):
-        return True
-    def is_zero(self):
-        return False
+    @abc.abstractclassmethod
+    def is_identity(self) -> bool:
+        raise NotImplemented()
 
-    def __add__(self, anext):
-        result = Container(
-            operator=self.operator,
-            items=[],
-            sinks=self.sinks.union(anext.sinks),
-            sources=self.sources.union(anext.sources),
-            operations=self.operations.union(anext.operations),
-            processeditems=[self, "'+'", anext])
-        return result
-
-    def __sub__(self, anext):
-        result = Container(
-            operator=self.operator,
-            items=[],
-            sinks=_Set_operations.discard_b_from_a(self.sinks, anext.sinks),
-            sources=_Set_operations.discard_b_from_a(self.sources, anext.sources),
-            operations=_Set_operations.discard_b_from_a(self.operations, anext.operations),
-            processeditems=[self, "'-'", anext])
-        return result
-
-    def __mul__(self, anext):
-        result = copy.copy(anext)
-        result.processeditems = [self, "'*'", anext]
-        return anext
-
+    @abc.abstractclassmethod
+    def is_zero(self)  -> bool:
+        raise NotImplemented()
+    
     def evaluate(self):
-        operations = sorted(self.operations, key = Freezed_fnc.sort_key)
+        operations = sorted(self.operations, key = FreezedFunction.sort_key)
         
         for frozen in operations:
             frozen.evaluate()
 
-    def __str__(self):
-        return 'I'
+    @abc.abstractclassmethod
+    def __str__(self) -> str:
+        raise NotImplemented()
 
     def __repr__(self):
         return str(self)
 
 
-class Zero(Identity):
-    def __init__(self, operator=None):
-        self.sources = set([])
-        self.sinks = set([])
-        self.operations = set([])
-        self.operator = operator
-
-    def is_identity(self):
-        return False
-    def is_zero(self):
-        return True
-    def __mul__(self, anext):
-        if anext.is_identity():
-            return self
-        result = copy.copy(anext)
-        result.sinks = set([])
-        result.processeditems = [self, "'*'", anext]
+class EquationTerm(Category):
+    def __add__(self, anext: Category) -> Category:
+        result = MediateTerm(
+            operator=self.operator,
+            sinks=self.sinks.union(anext.sinks),
+            sources=self.sources.union(anext.sources),
+            operations=self.operations.union(anext.operations),
+            processed_term=ProcessedTerm(self, CategoryOperations.ADD, anext))
         return result
 
-    def __str__(self):
-        return 'O'
-    def __repr__(self):
-        return str(self)
+    def __sub__(self, anext: Category) -> Category:
+        result = MediateTerm(
+            operator=self.operator,
+            sinks=_Set_operations.discard_b_from_a(self.sinks, anext.sinks),
+            sources=_Set_operations.discard_b_from_a(self.sources, anext.sources),
+            operations=_Set_operations.discard_b_from_a(self.operations, anext.operations),
+            processed_term=ProcessedTerm(self, CategoryOperations.DISCARD, anext))
+        return result
 
-def get_I_and_O(operator): return Identity(operator), Zero(operator)
-
-
-class Container(Identity):
-    def __init__(
-            self,
-            operator=None,
-            items=[],
-            sources=[],
-            sinks=[],
-            operations=[],
-            processeditems=[]):
-
-
-        self.sources = set(sources)
-        self.sinks = set(sinks)
-        self.operations = set(operations)
-
-        self.operator = operator
-
-        for item in items:
-            if isinstance(item, Identity):
-                self.sources.update(item.sources)
-                self.sinks.update(item.sinks)
-                self.operations.update(item.operations)
-            else:
-                self.sources.add(item)
-                self.sinks.add(item)
-        self.processeditems = list(items) + processeditems
-
-    def __str__(self):
-        return "C(%s)" % ",".join(map(str, self.processeditems))
-
-    def is_identity(self):
-        return False
-    def is_zero(self):
-        return len(self.sinks) == 0 and len(self.sources) == 0 and len(self.operations) == 0
-
-    def __mul__(self, anext):
+    def __mul__(self, anext: Category) -> Category:
         if anext.is_identity():
-            return self
+            return MediateTerm(
+                sinks=self.sinks,
+                sources=self.sources,
+                operations=self.operations,
+                operator=anext.operator,
+                processed_term = ProcessedTerm(self, CategoryOperations.ARROW, anext))
+                
         if anext.is_zero():
-            new = copy.copy(self)
-            new.sources = set([])
-            return new
-
+            return MediateTerm(
+                sinks=self.sinks,
+                sources=set(),
+                operations=self.operations,
+                operator=anext.operator,
+                processed_term = ProcessedTerm(self, CategoryOperations.ARROW, anext))
+                
         new_operations = set([])
         for source in self.sources:
             if isinstance(source, Identity):
@@ -214,77 +210,290 @@ class Container(Identity):
         operations = self.operations.union(anext.operations).union(new_operations)
         #print operations
         #print len(operations)
-        result = Container(
+        result = MediateTerm(
             operator=anext.operator,
-            items=set([]),
             sinks=new_sinks,
             sources=new_sources,
             operations=operations,
-            processeditems=[self, "'*'", anext])
+            processed_term = ProcessedTerm(self, CategoryOperations.ARROW, anext))
         return result
+    
+
+class ProcessedTerm:
+    def __init__(self, source: Category=None, operation: CategoryOperations=None, sink: Category=None):
+        if None in [source, operation, sink]:
+            raise ValueError("these should not be none {}".format([source, operation, sink]))
+        self._source = source
+        self._operation = operation
+        self._sink = sink
+    
+    def __str__(self):
+        return "({}) {} ({})".format(self.source, self.operation.value, self.sink)
+    
+    @property
+    def source(self):
+        return self._source
+   
+    @property
+    def operation(self):
+        return self._operation
+       
+    @property
+    def sink(self):
+        return self._sink
+
+
+class Identity(EquationTerm):
+    def __init__(self, operator:Callable=None):
+        super().__init__(
+            sources=set([self]),
+            sinks=set([self]),
+            operations=set([]),
+            operator=operator)
+
+    def __mul__(self, anext: Category) -> Category:
+        return MediateTerm(
+            sinks=anext.sinks,
+            sources=anext.sources,
+            operations=anext.operations,
+            operator=anext.operator,
+            processed_term = ProcessedTerm(self, CategoryOperations.ARROW, anext))
+
+    def __str__(self):
+        return 'I'
+        
+    def is_identity(self) -> bool:
+        return True
+
+    def is_zero(self) -> bool:
+        return False
+
+
+
+class Zero(EquationTerm):
+    def __init__(self, operator: Callable=None):
+        super().__init__(
+            sources=set([]),
+            sinks=set([]),
+            operations=set([]),
+            operator=operator)
+
+    def is_identity(self) -> bool:
+        return False
+        
+    def is_zero(self) -> bool:
+        return True
+    
+    def __mul__(self, anext: Category) -> Category:
+        return MediateTerm(
+            sinks=set([]),
+            sources=anext.sources,
+            operations=anext.operations,
+            operator=anext.operator,
+            processed_term = ProcessedTerm(self, CategoryOperations.ARROW, anext))
+
+    def __str__(self) -> str:
+        return 'O'
+
+
+
+def get_I_and_O(operator): return Identity(operator), Zero(operator)
+
+class Adder(EquationTerm):
+    def __init__(self, items: Set[object], operator=None):
+        sources=set([])
+        sinks=set([])
+        operations=set([])
+        self._items = items
+            
+        for item in items:
+            if isinstance(item, Identity):
+                sources.update(item.sources)
+                sinks.update(item.sinks)
+                operations.update(item.operations)
+            else:
+                sources.add(item)
+                sinks.add(item)
+                
+        super().__init__(
+            sources=sources,
+            sinks=sinks,
+            operations=operations,
+            operator=operator)
+
+    def is_identity(self) -> bool:
+        return False
+        
+    def is_zero(self) -> bool:
+        return False
+
+    def __str__(self):
+        return "C({})".format(", ".join(map(str, self._items)))
+
+
+class MediateTerm(EquationTerm):
+    def __init__(
+            self,
+            operator: Callable=None,
+            sources: Set=None,
+            sinks: Set=None,
+            operations: FreezablesSet=None,
+            processed_term: ProcessedTerm=None):        
+
+        super().__init__(
+            sources=sources,
+            sinks=sinks,
+            operations=operations,
+            operator=operator)
+        if processed_term is None:
+            raise ValueError('processed_term should not be None')
+        self._processed_term = processed_term
+
+    @property
+    def processed_term(self) -> ProcessedTerm:
+        return self._processed_term
+
+    def __str__(self) -> str:
+        return str(self.processed_term)
+
+    def is_identity(self) -> bool:
+        return False
+        
+    def is_zero(self) -> bool:
+        return False
+
+
+
+
 
 
 
 def from_operator(operation=debug):
-    """Create category like equations for the given operator in which
-the underlaying '+' and '-' operations are basic set operations called union and discard.
-The multiplication operator '*' connects sources to sinks. The equation system also has
-a Identity 'I' and zerO 'O' terms. For futher details search 'category theory'
-from the Wikipedia and do your own maths.
+    """
 
-Here our connector operation is print function called 'debug'
+Here our connector operation is print function called 'debug' which
+prints an arrow between two objects:
 
     >>> debug('a', 'b')
     a -> b
+    
+    >>> debug('b', 'a')
+    b -> a
+    
+    >>> debug('a', 'a')
+    a -> a
 
 Get I and O singletons and class C, which use previously defined debug -function.
     >>> I, O, C = from_operator(debug)
-    >>> I
-    I
-    >>> O
-    O
-    >>> I * I
-    I
-    >>> O * I
-    O
-    >>> I * O
-    O
+    >>> I == I
+    True
+    >>> O == I
+    False
+    >>> C(1)
+    C(1)
+
+The items do have differing sinks and sources:
+
+    >>> I.sinks
+    {I}
+    >>> I.sources
+    {I}
+    
+    >>> O.sinks
+    set()
+    >>> O.sources
+    set()
+
+    >>> C(1).sinks
+    {1}
+    >>> C(1).sources
+    {1}
+
+
+You can write additions also with this notation
+
+    >>> C(1,2) == C(1) + C(2)
+    True
+    
 
 The multiplication connects sources to sinks like this:
+
     >>> (C(1,2) * C(3,4)).evaluate()
     1 -> 3
     1 -> 4
     2 -> 3
     2 -> 4
+    
+    >>> (C(3,4) * C(1,2)).sinks
+    {3, 4}
+    
+    >>> (C(3,4) * C(1,2)).sources
+    {1, 2}
 
-The identity I works like usual:
-    >>> I * C(1)
-    C(1)
 
-    >>> C(1) * I
-    C(1)
+By combining the two previous examples:
 
-Zero is a bit trickier:
-    >>> C(1) * O
-    C(1)
+    >>> C(1,2) * C(3,4) == (C(1) + C(2)) * (C(3) + C(4))
+    True
 
-But:
-    >>> ((C(1) * O) * C(2)).evaluate()
+The order inside C(...) does not matter:
 
-See, no debug prints, no connections being made.
-The 'O' works like a terminator, if you need one.
+    >>> (C(1,2) * C(3,4)) == (C(2,1) * C(4,3))
+    True
+    
+On the other hand you can not swap the terms like:
+
+    >>> (C(1,2) * C(3,4)) == (C(3,4) * C(1,2))
+    False
+
+Because:
+
+    >>> (C(3,4) * C(1,2)).evaluate()
+    3 -> 1
+    3 -> 2
+    4 -> 1
+    4 -> 2
+
+The discard operation works like this:
+    
+    >>> (C(3,4) * C(1,2) - C(4) * C(1)).evaluate()
+    3 -> 1
+    3 -> 2
+    4 -> 2
+
+But
+
+    >>> (C(3,4) * C(1,2) - C(4) * C(1)) == C(3) * C(1,2) + C(4) * C(2)
+    False
+
+Because sinks and sources differ:
+
+    >>> (C(3,4) * C(1,2) - C(4) * C(1)).sinks
+    {3}
+    >>> (C(3) * C(1,2) + C(4) * C(2)).sinks
+    {3, 4}
+
+The right form would have been:
+
+    >>> (C(3,4) * C(1,2) - C(4) * C(1)) == C(3) * C(1,2) + C(4) * C(2) - C(4) * O - O * C(1)
+    True
+
+    
+The identity I and zero O work together like usual:
+
+    >>> I * I == I
+    True
+    >>> O * I * O == O
+    True
+
 
 Identity 'I' works as a tool for equation simplifying.
-For example use see these two equations:
-    >>> (C(1,2) * C( C(3,4), I ) * C(5)).evaluate()
-    1 -> 3
-    1 -> 4
-    1 -> 5
-    2 -> 3
-    2 -> 4
-    2 -> 5
-    3 -> 5
-    4 -> 5
+For example:
+
+    >>> C(1,2) * C(3,4) * C(5) + C(1,2) * C(5) == C(1,2) * ( C(3,4) + I ) * C(5)
+    True
+    
+Because:
 
     >>> (C(1,2) * C(3,4) * C(5) + C(1,2) * C(5)).evaluate()
     1 -> 3
@@ -296,46 +505,45 @@ For example use see these two equations:
     3 -> 5
     4 -> 5
 
-Just some random examples more:
-    >>> C(1) * C(2)
-    C(C(1),'*',C(2))
+and
 
-    >>> C(0)*( C(1,2,3)*C(4,5) - C(1,2)*C(4) ) *C(6)
-    C(C(C(0),'*',C(C(C(1,2,3),'*',C(4,5)),'-',C(C(1,2),'*',C(4)))),'*',C(6))
-
-    >>> C(1,2) + C(1,4)
-    C(C(1,2),'+',C(1,4))
-
-    >>> C(1,2) - C(1,4)
-    C(C(1,2),'-',C(1,4))
-
-    >>> C(0)*( C(1,2,3)*C(4,5) - C(1,2)*C(4) ) *C(6)
-    C(C(C(0),'*',C(C(C(1,2,3),'*',C(4,5)),'-',C(C(1,2),'*',C(4)))),'*',C(6))
-
-
-    >>> (C(1,2) * C( C(I), I ) * C(5)).evaluate()
-    1 -> 5
-    2 -> 5
-
-    >>> C( C(1)* C( O * C(2), C(3), C(4) * O ) * C(5)).evaluate()
+    >>> (C(1,2) * ( C(3,4) + I ) * C(5)).evaluate()
     1 -> 3
     1 -> 4
-    2 -> 5
-    3 -> 5
-
-    >>> (C( C(1)* C( O * C(2), C(3), C(4) * O ) * C(5)) - C(1) * C(3) ).evaluate()
-    1 -> 4
-    2 -> 5
-    3 -> 5
-
-
-    >>> ( C(0)*( C(1,2,3)*C(4,5) - C(1,2)*C(4) ) *C(6)).evaluate()
-    0 -> 3
     1 -> 5
+    2 -> 3
+    2 -> 4
     2 -> 5
-    3 -> 4
     3 -> 5
-    5 -> 6
+    4 -> 5
+
+If two terms have the same middle part you can simplify equations via terminating loose sinks or sources with O:
+For example:
+    
+    >>> (C(1) * C(2) * C(4) + C(3) * C(4)).evaluate()
+    1 -> 2
+    2 -> 4
+    3 -> 4
+
+    >>> (C(1) * C(2) * C(4) + O * C(3) * C(4)).evaluate()
+    1 -> 2
+    2 -> 4
+    3 -> 4
+
+    >>> (C(1) * ( C(2) + O * C(3) ) * C(4)).evaluate()
+    1 -> 2
+    2 -> 4
+    3 -> 4
+
+    >>> C(1) * C(2) * C(4) + O * C(3) * C(4) == C(1) * ( C(2) + O * C(3) ) * C(4)
+    True
+    
+
+Note that the comparison wont work without the O -term because the sinks differ:
+
+    >>> C(1) * C(2) * C(4) +  C(3) * C(4) == C(1) * ( C(2) + O * C(3) ) * C(4)
+    False
+
 
     """
 
@@ -345,7 +553,7 @@ Just some random examples more:
 
 
     def _C(*things):
-        return Container(operator, list(things), [], [], [], [])
+        return Adder(operator=operator, items=set(things))
 
     return _I, _O, _C
 
