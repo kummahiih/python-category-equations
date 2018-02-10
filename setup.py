@@ -9,7 +9,6 @@ import category_equations
 README = "\n\n".join([
     "# python-category-equations",
     category_equations.__doc__,
-    category_equations.CategoryOperations.__doc__,
     category_equations.from_operator.__doc__])
 
 with open('README.md', 'wt') as readme_file:
@@ -17,7 +16,7 @@ with open('README.md', 'wt') as readme_file:
 
 setup(
     name='python-category-equations',
-    version='0.2.0',
+    version='0.3.0',
     description='python-category-equations',
     long_description=README,
     license="MIT",
