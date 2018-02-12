@@ -269,7 +269,6 @@ class Identity(EquationTerm):
         return False
 
 
-
 class Zero(EquationTerm):
     def __init__(self, operator: Callable=None):
         super().__init__(
@@ -295,9 +294,6 @@ class Zero(EquationTerm):
     def __str__(self) -> str:
         return 'O'
 
-
-
-def get_I_and_O(operator): return Identity(operator), Zero(operator)
 
 class Adder(EquationTerm):
     def __init__(self, items: Set[object], operator=None):
@@ -363,9 +359,7 @@ class MediateTerm(EquationTerm):
         return False
 
 
-
-
-
+def get_I_and_O(operator): return Identity(operator), Zero(operator)
 
 
 def from_operator(operation=debug):
