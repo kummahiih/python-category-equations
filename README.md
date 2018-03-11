@@ -1,7 +1,5 @@
 # python-category-equations
 
-## Rationale
-
 With the tools provided here you can create category like equations for the given operator.
 On the equations the underlaying '+' and '-' operations are basic set operations called union and discard 
 and the multiplication operator '*' connects sources to sinks. The equation system also has
