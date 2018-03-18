@@ -5,8 +5,6 @@
 
 """
 
-from copy import copy
-
 from category_equations.terms import (
     debug,
     from_operator,
@@ -16,63 +14,44 @@ from category_equations.terms import (
     ProcessedTerm,
     IEquationTerm)
 
+def term_is_terminal(term): return term.processed_term is None
 
-def get_o_tail_products(term: IEquationTerm):
+def term_is_o(term): return term.is_zero()
+
+def term_is_almost_o(term):
+    return term_is_o(term) or not term_is_terminal(term) and (
+        term_is_o(term.processed_term.source) or term_is_o(term.processed_term.sink))
+
+def term_sink_is_o(term): 
+    if term.processed_term is None:
+        return False
+    return term.processed_term.is_zero()
+
+def term_is_arrow(term): 
+    if term.processed_term is None:
+        return False
+    return term.processed_term.operation == CategoryOperations.ARROW
+
+def term_is_add(term): 
+    if term.processed_term is None:
+        return False
+    return term.processed_term.operation == CategoryOperations.ADD
+
+
+def get_all_terms(term: IEquationTerm):
     """
     >>> I, O, C = from_operator(debug)
     >>> a = C(1) * C(2) * C(3) * O
-    >>> get_o_tail_products(a)
-    [(((C(1)) * (C(2))) * (C(3))) * (O)]
-    >>> a = C(1) * (C(2) + C(3)*O) *C(4) * O
-    >>> get_o_tail_products(a)
-    [(((C(1)) * ((C(2)) + ((C(3)) * (O)))) * (C(4))) * (O), (C(3)) * (O)]
-
-    >>> a = C(1) * (C(2) + C(3)*O) + C(1) * O
-    >>> get_o_tail_products(a)
-    [(C(1)) * (O), (C(3)) * (O)]
-    >>> get_o_tail_products(O*O)
-    []
-    >>> get_o_tail_products(I*O)
-    []
-    >>> get_o_tail_products(I)
-    []
-    >>> get_o_tail_products(O)
-    []
-    >>> get_o_tail_products(C(4))
-    []
+    >>> for i in get_all_terms(a):
+    ...   print(i)
+    (((C(1)) * (C(2))) * (C(3))) * (O)
+    ((C(1)) * (C(2))) * (C(3))
+    (C(1)) * (C(2))
+    C(1)
+    C(2)
+    C(3)
+    O
     """
-
-    if not isinstance(term, IEquationTerm):
-        raise ValueError("expected IEquationTerm, got '{}'".format(type(term)))
-
-    currently_analyzed = set()
-    already_analyzed = dict()
-
-    def analyze_and_remember(term: IEquationTerm):
-        if term in currently_analyzed:
-            raise ValueError("found a loop leading to '{}'".format(term))
-        if term in already_analyzed:
-            return already_analyzed[term]
-        currently_analyzed.add(term)
-        result = get_o_product(term)
-        already_analyzed[term] = result
-        currently_analyzed.remove(term)
-        return result
-
-    def get_o_product(term: IEquationTerm):
-        if term.processed_term is None:
-            return None
-        if term.processed_term.operation != CategoryOperations.ARROW:
-            return None
-        if term.processed_term.source.is_zero():
-            return None
-        if term.processed_term.source.is_identity():
-            return None
-        if term.processed_term.sink.is_zero():
-            return term
-        return analyze_and_remember(term.processed_term.sink)
-
-
     all_terms = set()
 
     def collect_terms(term: IEquationTerm):
@@ -85,14 +64,72 @@ def get_o_tail_products(term: IEquationTerm):
         collect_terms(term.processed_term.sink)
 
     collect_terms(term)
+    all_terms_l = list(all_terms)
+    all_terms_l.sort()
+    return all_terms_l
 
-    for processed_term in all_terms:
-        analyze_and_remember(processed_term)
+def get_tail_products(term: IEquationTerm):
+    """
+    >>> I, O, C = from_operator(debug)
+    >>> for i in get_tail_products(C(1) * C(2) * C(3) * (O + C(4))):
+    ...   print(i)
+    (((C(1)) * (C(2))) * (C(3))) * ((O) + (C(4)))
+    ((C(2)) * (C(3))) * ((O) + (C(4)))
+    (C(3)) * ((O) + (C(4)))
+    (O) + (C(4))
+    
+    >>> for i in get_tail_products(C(1) * (C(2) + C(3)) * (O + C(4))):
+    ...   print(i)
+    ((C(1)) * ((C(2)) + (C(3)))) * ((O) + (C(4)))
+    ((C(2)) + (C(3))) * ((O) + (C(4)))
+    (O) + (C(4))
+    """
+    if term_is_terminal(term):
+        yield term
+    if term_is_add(term):
+        yield term
 
-    o_products = [i for i in already_analyzed.values() if i is not None]
-    o_products.sort()
-    return o_products
+    if term_is_arrow(term):
+        right_tail_terms = list(get_tail_products(term.processed_term.sink))
+        left_tail_terms = list(get_tail_products(term.processed_term.source))
+        if len(right_tail_terms) > 0:
+            for tail in left_tail_terms:
+                yield tail * term.processed_term.sink
+            yield from right_tail_terms
 
+def get_topmost_sums(term: IEquationTerm):
+    """
+    >>> I, O, C = from_operator(debug)
+    >>> for i in get_topmost_sums(C(1) + (C(2) * C(3)) + C(1)* C(3) * C(4)):
+    ...   print(i)
+    C(1)
+    (C(2)) * (C(3))
+    ((C(1)) * (C(3))) * (C(4))
+
+    """
+    if term_is_terminal(term):
+        yield term
+    if term_is_arrow(term):
+        yield term
+    if term_is_add(term):
+        yield from get_topmost_sums(term.processed_term.source)
+        yield from get_topmost_sums(term.processed_term.sink)
+
+def get_topmost_tail_products(term: IEquationTerm):
+    """
+    >>> I, O, C = from_operator(debug)
+    >>> for i in get_topmost_tail_products(C(1) * C(2) + C(1) * C(3) * (O + C(4)) + C(5)):
+    ...   print(i)
+    (C(1)) * (C(2))
+    C(2)
+    ((C(1)) * (C(3))) * ((O) + (C(4)))
+    (C(3)) * ((O) + (C(4)))
+    (O) + (C(4))
+    C(5)
+
+    """
+    for sub_term in get_topmost_sums(term):
+        yield from get_tail_products(sub_term)
 
 
 if __name__ == '__main__':
