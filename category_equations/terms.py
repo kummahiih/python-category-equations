@@ -184,8 +184,55 @@ class Category(metaclass=abc.ABCMeta):
         return str(self)
 
 
-class EquationTerm(Category):
-    def __add__(self, anext: Category) -> Category:
+class ProcessedTerm:
+    def __init__(
+            self,
+            source: Category = None,
+            operation: CategoryOperations = None,
+            sink: Category = None):
+        if None in [source, operation, sink]:
+            raise ValueError("these should not be none {}".format([source, operation, sink]))
+        self._source = source
+        self._operation = operation
+        self._sink = sink
+
+    def __str__(self):
+        return "({}) {} ({})".format(self.source, self.operation.value, self.sink)
+
+    def __repr__(self):
+        return str(self)
+
+    @property
+    def source(self):
+        return self._source
+
+    @property
+    def operation(self):
+        return self._operation
+
+    @property
+    def sink(self):
+        return self._sink
+
+
+class IEquationTerm(metaclass=abc.ABCMeta):
+
+    @abc.abstractproperty
+    def processed_term(self) -> ProcessedTerm:
+        raise NotImplementedError
+
+
+class EquationTerm(Category, IEquationTerm):
+
+    def __init__(self, processed_term: ProcessedTerm = None, **rest):
+        self._processed_term = processed_term
+        super().__init__(**rest)
+
+    @property
+    def processed_term(self) -> ProcessedTerm:
+        return self._processed_term
+
+    def __add__(self, anext: Category) -> IEquationTerm:
         result = MediateTerm(
             operator=self.operator,
             sinks=self.sinks.union(anext.sinks),
@@ -194,7 +241,7 @@ class EquationTerm(Category):
             processed_term=ProcessedTerm(self, CategoryOperations.ADD, anext))
         return result
 
-    def __sub__(self, anext: Category) -> Category:
+    def __sub__(self, anext: Category) -> IEquationTerm:
         result = MediateTerm(
             operator=self.operator,
             sinks=_Set_operations.discard_b_from_a(self.sinks, anext.sinks),
@@ -203,7 +250,7 @@ class EquationTerm(Category):
             processed_term=ProcessedTerm(self, CategoryOperations.DISCARD, anext))
         return result
 
-    def __mul__(self, anext: Category) -> Category:
+    def __mul__(self, anext: Category) -> IEquationTerm:
         if anext.is_identity():
             return MediateTerm(
                 sinks=self.sinks,
@@ -262,40 +309,9 @@ class EquationTerm(Category):
         return result
 
 
-class ProcessedTerm:
-    def __init__(
-            self,
-            source: Category = None,
-            operation: CategoryOperations = None,
-            sink: Category = None):
-        if None in [source, operation, sink]:
-            raise ValueError("these should not be none {}".format([source, operation, sink]))
-        self._source = source
-        self._operation = operation
-        self._sink = sink
-
-    def __str__(self):
-        return "({}) {} ({})".format(self.source, self.operation.value, self.sink)
-
-    def __repr__(self):
-        return str(self)
-
-    @property
-    def source(self):
-        return self._source
-
-    @property
-    def operation(self):
-        return self._operation
-
-    @property
-    def sink(self):
-        return self._sink
-
-
-
 class Identity(EquationTerm):
-    def __init__(self, operator:Callable = None):
+
+    def __init__(self, operator: Callable = None):
         super().__init__(
             sources=set([self]),
             sinks=set([self]),
@@ -321,7 +337,8 @@ class Identity(EquationTerm):
 
 
 class Zero(EquationTerm):
-    def __init__(self, operator: Callable=None):
+
+    def __init__(self, operator: Callable = None):
         super().__init__(
             sources=set([]),
             sinks=set([]),
@@ -347,7 +364,8 @@ class Zero(EquationTerm):
 
 
 class Adder(EquationTerm):
-    def __init__(self, items: Set[object], operator=None):
+
+    def __init__(self, items: Set[object], operator = None):
         sources = set([])
         sinks = set([])
         operations = OperationsSet([], operator=operator)
@@ -379,6 +397,7 @@ class Adder(EquationTerm):
 
 
 class MediateTerm(EquationTerm):
+
     def __init__(
             self,
             operator: Callable = None,
@@ -386,19 +405,16 @@ class MediateTerm(EquationTerm):
             sinks: Set = None,
             operations: OperationsSet = None,
             processed_term: ProcessedTerm = None):
-
+        if processed_term is None:
+            raise ValueError('processed_term should not be None')
         super().__init__(
             sources=sources,
             sinks=sinks,
             operations=operations,
-            operator=operator)
-        if processed_term is None:
-            raise ValueError('processed_term should not be None')
-        self._processed_term = processed_term
+            operator=operator,
+            processed_term=processed_term)
 
-    @property
-    def processed_term(self) -> ProcessedTerm:
-        return self._processed_term
+
 
     def __str__(self) -> str:
         return str(self.processed_term)
@@ -412,17 +428,16 @@ class MediateTerm(EquationTerm):
 
 def get_I_and_O(operator): return Identity(operator), Zero(operator)
 
-
 def from_operator(operation=debug):
     """# python-category-equations
 
 With the tools provided here you can create category like equations for the given operator.
-On the equations the underlaying '+' and '-' operations are basic set operations called union and discard 
-and the multiplication operator '*' connects sources to sinks. The equation system also has
-a Identity 'I' term and zerO -like termination term 'O'. 
+On the equations the underlaying '+' and '-' operations are basic set operations
+called union and discard  and the multiplication operator '*' connects sources to sinks.
+The equation system also has a Identity 'I' term and zerO -like termination term 'O'.
 For futher details go https://en.wikipedia.org/wiki/Category_(mathematics)#Definition
 
-## Usage    
+## Usage
 
 
 Here our connector operation is print function called 'debug' which
@@ -572,7 +587,8 @@ and
     3 -> 5
     4 -> 5
 
-If two terms have the same middle part you can simplify equations via terminating loose sinks or sources with O:
+If two terms have the same middle part you can simplify equations
+via terminating loose sinks or sources with O:
 For example:
 
     >>> (C(1) * C(2) * C(4) + C(3) * C(4)).evaluate()
