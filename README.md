@@ -1,12 +1,12 @@
 # python-category-equations
 
 With the tools provided here you can create category like equations for the given operator.
-On the equations the underlaying '+' and '-' operations are basic set operations called union and discard 
-and the multiplication operator '*' connects sources to sinks. The equation system also has
-a Identity 'I' term and zerO -like termination term 'O'. 
+On the equations the underlaying '+' and '-' operations are basic set operations
+called union and discard  and the multiplication operator '*' connects sources to sinks.
+The equation system also has a Identity 'I' term and zerO -like termination term 'O'.
 For futher details go https://en.wikipedia.org/wiki/Category_(mathematics)#Definition
 
-## Usage    
+## Usage
 
 
 Here our connector operation is print function called 'debug' which
@@ -156,7 +156,8 @@ and
     3 -> 5
     4 -> 5
 
-If two terms have the same middle part you can simplify equations via terminating loose sinks or sources with O:
+If two terms have the same middle part you can simplify equations
+via terminating loose sinks or sources with O:
 For example:
 
     >>> (C(1) * C(2) * C(4) + C(3) * C(4)).evaluate()
