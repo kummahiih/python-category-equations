@@ -10,40 +10,57 @@ from typing import Set, List, Callable
 
 
 class FreezedOperation:
-    def __init__(self, operator, a, b):
-        self.operator = operator
-        self._a = a
-        self._b = b
+    def __init__(self, operator, source, sink):
+        self._operator = operator
+        self._source = source
+        self._sink = sink
 
     @property
-    def a(self):
-        return self._a
+    def operator(self) -> Callable:
+        """
+        The connecting operator, which is about to connect the source to the sink
+        """
+        return self._operator
 
     @property
-    def b(self):
-        return self._b
+    def source(self):
+        """
+        The source, which is waiting for the connection with the sink
+        """
+        return self._source
+
+    @property
+    def sink(self):
+        """
+        The sink, which is waiting for the connection with the source
+        """
+
+        return self._sink
 
 
     def __repr__(self):
-        return 'F(%s,%s)'% (self.a, self.b)
+        return 'F(%s,%s)'% (self.source, self.sink)
 
     def evaluate(self):
-        return self.operator(self.a, self.b)
+        """
+        Connect source to sink via operator
+        """
+        return self.operator(self.source, self.sink)
 
     def __eq__(self, other):
         return isinstance(other, FreezedOperation) and \
-            self.a == other.a and self.b == other.b
+            (self.operator, self.source, self.sink) == (other.operator, other.source, other.sink)
 
     def __hash__(self):
-        return (self.operator, self.a, self.b).__hash__()
+        return (self.operator, self.source, self.sink).__hash__()
 
     @staticmethod
     def sort_key(f_f):
-        return (f_f.operator, f_f.a, f_f.b)
+        return (f_f.operator, f_f.source, f_f.sink)
 
 
-def debug(a, b):
-    print(a, '->', b)
+def debug(source, sink):
+    print(source, '->', sink)
 
 class _Set_operations:
 
@@ -185,6 +202,24 @@ class Category(metaclass=abc.ABCMeta):
 
 
 class ProcessedTerm:
+    """
+    >>> I, O, C = from_operator(debug)
+    >>> a = ProcessedTerm(C('source'), CategoryOperations.ARROW, C('sink') )
+    >>> b = ProcessedTerm(C('source'), CategoryOperations.ARROW, C('sink') )
+    >>> c = ProcessedTerm(C('source'), CategoryOperations.ARROW, C('source') )
+    >>> d = ProcessedTerm(C('source'), CategoryOperations.ADD, C('sink') )
+    >>> e = ProcessedTerm(C('sink'), CategoryOperations.ARROW, C('sink') )
+    
+    >>> a == b == a == a
+    True
+    >>> a == c
+    False
+    >>> a == d
+    False
+    >>> a == e
+    False
+
+    """
     def __init__(
             self,
             source: Category = None,
@@ -213,6 +248,13 @@ class ProcessedTerm:
     @property
     def sink(self):
         return self._sink
+
+    def __eq__(self, other):
+        return isinstance(other, ProcessedTerm) and \
+            (self.source, self.operation.value, self.sink) == (other.source, other.operation.value, other.sink)
+
+    def __hash__(self):
+        return (self.source, self.operation, self.sink).__hash__()
 
 
 class IEquationTerm(metaclass=abc.ABCMeta):
