@@ -16,7 +16,8 @@ from .terms import (
     IEquationTerm,
     EquationTerm)
 
-from .analysis import get_o_tail_products
+from .analysis import (
+    get_all_terms, get_tail_products, get_topmost_sums, get_topmost_tail_products)
 
 __all__ = [
     'debug',
@@ -27,4 +28,7 @@ __all__ = [
     'ProcessedTerm',
     'IEquationTerm',
     'EquationTerm',
-    'get_o_tail_products']
+    'get_all_terms',
+    'get_tail_products',
+    'get_topmost_sums',
+    'get_topmost_tail_products']
