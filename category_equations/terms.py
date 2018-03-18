@@ -242,7 +242,7 @@ class ProcessedTerm:
         return self._source
 
     @property
-    def operation(self):
+    def operation(self) -> CategoryOperations:
         return self._operation
 
     @property
@@ -257,14 +257,14 @@ class ProcessedTerm:
         return (self.source, self.operation, self.sink).__hash__()
 
 
-class IEquationTerm(metaclass=abc.ABCMeta):
+class IEquationTerm(Category, metaclass=abc.ABCMeta):
 
     @abc.abstractproperty
     def processed_term(self) -> ProcessedTerm:
         raise NotImplementedError
 
 
-class EquationTerm(Category, IEquationTerm):
+class EquationTerm(IEquationTerm):
 
     def __init__(self, processed_term: ProcessedTerm = None, **rest):
         self._processed_term = processed_term

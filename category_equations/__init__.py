@@ -6,7 +6,25 @@
 
 """
 
-from .terms import from_operator
+from .terms import (
+    debug,
+    from_operator,
+    OperationsSet,
+    Category,
+    CategoryOperations,
+    ProcessedTerm,
+    IEquationTerm,
+    EquationTerm)
 
+from .analysis import get_o_tail_products
 
-__all__ = ['from_operator']
+__all__ = [
+    'debug',
+    'from_operator',
+    'OperationsSet',
+    'Category',
+    'CategoryOperations',
+    'ProcessedTerm',
+    'IEquationTerm',
+    'EquationTerm',
+    'get_o_tail_products']
