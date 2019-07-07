@@ -1,5 +1,5 @@
 """
-   @copyright: 2010 - 2018 by Pauli Rikula <pauli.rikula@gmail.com>
+   @copyright: 2010 - 2019 by Pauli Rikula <pauli.rikula@gmail.com>
    @license: MIT <http://www.opensource.org/licenses/mit-license.php>
 """
 
@@ -13,7 +13,7 @@ with open('README.md', 'wt') as readme_file:
 
 setup(
     name='python-category-equations',
-    version='0.3.8',
+    version='0.3.9',
     description='python-category-equations',
     long_description=README,
     license="MIT",
