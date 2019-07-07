@@ -542,8 +542,21 @@ The multiplication connects sources to sinks like this:
     >>> (C(3,4) * C(1,2)).sources
     {1, 2}
 
+Or
 
-By combining the two previous examples:
+    >>> C(1) * C(2, I) == C(1) + C(1) * C(2)
+    True
+
+    >>> (C(1) * C(2, I)).evaluate()
+    1 -> 2
+
+    >>> (C(1) * C(2, I)).sinks
+    {1}
+
+    >>> (C(1) * C(2, I)).sources
+    {1, 2}
+
+And writing C(1,2) instead of C(1) + C(2) works with multiplication too:
 
     >>> C(1,2) * C(3,4) == (C(1) + C(2)) * (C(3) + C(4))
     True
