@@ -1,5 +1,5 @@
 """
-   @copyright: 2010 - 2018 by Pauli Rikula <pauli.rikula@gmail.com>
+   @copyright: 2010 - 2019 by Pauli Rikula <pauli.rikula@gmail.com>
    @license: MIT <http://www.opensource.org/licenses/mit-license.php>
 """
 
@@ -219,6 +219,8 @@ class ProcessedTerm:
     >>> a == e
     False
 
+
+
     """
     def __init__(
             self,
@@ -232,6 +234,12 @@ class ProcessedTerm:
         self._sink = sink
 
     def __str__(self):
+        if isinstance(self.source, Adder) or (isinstance(self.source, MediateTerm) and self.source.processed_term.operation == CategoryOperations.ARROW):
+            if isinstance(self.sink, Adder) or (isinstance(self.sink, MediateTerm) and self.sink.processed_term.operation == CategoryOperations.ARROW):
+                return "{} {} {}".format(self.source, self.operation.value, self.sink)
+            return "{} {} ({})".format(self.source, self.operation.value, self.sink)
+        if isinstance(self.sink, Adder) or (isinstance(self.sink, MediateTerm) and self.sink.processed_term.operation == CategoryOperations.ARROW):
+            return "({}) {} {}".format(self.source, self.operation.value, self.sink)
         return "({}) {} ({})".format(self.source, self.operation.value, self.sink)
 
     def __repr__(self):
@@ -670,6 +678,26 @@ Note that the comparison wont work without the O -term because the sinks differ:
     >>> C(1) * C(2) * C(4) +  C(3) * C(4) == C(1) * ( C(2) + O * C(3) ) * C(4)
     False
 
+
+Printouts are simplified like this:
+
+    >>> C(1, 2) * C(1, 2)
+    C(1, 2) * C(1, 2)
+
+    >>> C(1, 2) * (C(1) + C(2))
+    C(1, 2) * (C(1) + C(2))
+
+    >>> C(1, 2) * (C(1) * C(2))
+    C(1, 2) * C(1) * C(2)
+
+    >>> (C(1) + C(2)) * (C(1) * C(2))
+    (C(1) + C(2)) * C(1) * C(2)
+
+    >>> (C(1) * C(2)) * (C(1) * C(2))
+    C(1) * C(2) * C(1) * C(2)
+
+    >>> (C(1) * C(2)) * (C(1) * C(2))
+    C(1) * C(2) * C(1) * C(2)
 
     """
 

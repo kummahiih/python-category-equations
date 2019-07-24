@@ -198,4 +198,24 @@ Note that the comparison wont work without the O -term because the sinks differ:
     False
 
 
+Printouts are simplified like this:
+
+    >>> C(1, 2) * C(1, 2)
+    C(1, 2) * C(1, 2)
+
+    >>> C(1, 2) * (C(1) + C(2))
+    C(1, 2) * (C(1) + C(2))
+
+    >>> C(1, 2) * (C(1) * C(2))
+    C(1, 2) * C(1) * C(2)
+
+    >>> (C(1) + C(2)) * (C(1) * C(2))
+    (C(1) + C(2)) * C(1) * C(2)
+
+    >>> (C(1) * C(2)) * (C(1) * C(2))
+    C(1) * C(2) * C(1) * C(2)
+
+    >>> (C(1) * C(2)) * (C(1) * C(2))
+    C(1) * C(2) * C(1) * C(2)
+
     
