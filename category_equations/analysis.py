@@ -5,14 +5,11 @@
 
 """
 
-from category_equations.terms import (
-    debug,
-    from_operator,
-    OperationsSet,
-    Category,
+from .term import (
     CategoryOperations,
     ProcessedTerm,
-    IEquationTerm)
+    IEquationTerm,
+    CategoryOperations)
 
 def term_is_terminal(term): return term.processed_term is None
 
@@ -44,13 +41,14 @@ def get_all_terms(term: IEquationTerm):
     >>> a = C(1) * C(2) * C(3) * O
     >>> for i in get_all_terms(a):
     ...   print(i)
-    (((C(1)) * (C(2))) * (C(3))) * (O)
-    ((C(1)) * (C(2))) * (C(3))
-    (C(1)) * (C(2))
     C(1)
+    C(1) * C(2)
+    C(1) * C(2) * C(3)
+    C(1) * C(2) * C(3) * O
     C(2)
     C(3)
     O
+
     """
     all_terms = set()
 
@@ -73,16 +71,17 @@ def get_tail_products(term: IEquationTerm):
     >>> I, O, C = from_operator(debug)
     >>> for i in get_tail_products(C(1) * C(2) * C(3) * (O + C(4))):
     ...   print(i)
-    (((C(1)) * (C(2))) * (C(3))) * ((O) + (C(4)))
-    ((C(2)) * (C(3))) * ((O) + (C(4)))
-    (C(3)) * ((O) + (C(4)))
-    (O) + (C(4))
+    C(1) * C(2) * C(3) * (O + C(4))
+    C(2) * C(3) * (O + C(4))
+    C(3) * (O + C(4))
+    O + C(4)
     
     >>> for i in get_tail_products(C(1) * (C(2) + C(3)) * (O + C(4))):
     ...   print(i)
-    ((C(1)) * ((C(2)) + (C(3)))) * ((O) + (C(4)))
-    ((C(2)) + (C(3))) * ((O) + (C(4)))
-    (O) + (C(4))
+    C(1) * (C(2) + C(3)) * (O + C(4))
+    (C(2) + C(3)) * (O + C(4))
+    O + C(4)
+
     """
     if term_is_terminal(term):
         yield term
@@ -103,8 +102,9 @@ def get_topmost_sums(term: IEquationTerm):
     >>> for i in get_topmost_sums(C(1) + (C(2) * C(3)) + C(1)* C(3) * C(4)):
     ...   print(i)
     C(1)
-    (C(2)) * (C(3))
-    ((C(1)) * (C(3))) * (C(4))
+    C(2) * C(3)
+    C(1) * C(3) * C(4)
+
 
     """
     if term_is_terminal(term):
@@ -120,11 +120,11 @@ def get_topmost_tail_products(term: IEquationTerm):
     >>> I, O, C = from_operator(debug)
     >>> for i in get_topmost_tail_products(C(1) * C(2) + C(1) * C(3) * (O + C(4)) + C(5)):
     ...   print(i)
-    (C(1)) * (C(2))
+    C(1) * C(2)
     C(2)
-    ((C(1)) * (C(3))) * ((O) + (C(4)))
-    (C(3)) * ((O) + (C(4)))
-    (O) + (C(4))
+    C(1) * C(3) * (O + C(4))
+    C(3) * (O + C(4))
+    O + C(4)
     C(5)
 
     """
@@ -132,6 +132,3 @@ def get_topmost_tail_products(term: IEquationTerm):
         yield from get_tail_products(sub_term)
 
 
-if __name__ == '__main__':
-    import doctest
-    doctest.testmod()

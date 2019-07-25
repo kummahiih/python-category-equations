@@ -1,3 +1,4 @@
+
 # python-category-equations
 
 With the tools provided here you can create category like equations for the given operator.
@@ -196,26 +197,5 @@ Note that the comparison wont work without the O -term because the sinks differ:
 
     >>> C(1) * C(2) * C(4) +  C(3) * C(4) == C(1) * ( C(2) + O * C(3) ) * C(4)
     False
-
-
-Printouts are simplified like this:
-
-    >>> C(1, 2) * C(1, 2)
-    C(1, 2) * C(1, 2)
-
-    >>> C(1, 2) * (C(1) + C(2))
-    C(1, 2) * (C(1) + C(2))
-
-    >>> C(1, 2) * (C(1) * C(2))
-    C(1, 2) * C(1) * C(2)
-
-    >>> (C(1) + C(2)) * (C(1) * C(2))
-    (C(1) + C(2)) * C(1) * C(2)
-
-    >>> (C(1) * C(2)) * (C(1) * C(2))
-    C(1) * C(2) * C(1) * C(2)
-
-    >>> (C(1) * C(2)) * (C(1) * C(2))
-    C(1) * C(2) * C(1) * C(2)
 
     
