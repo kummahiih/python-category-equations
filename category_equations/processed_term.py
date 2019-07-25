@@ -37,11 +37,11 @@ class ProcessedTerm:
     ProcessedTerm class is for the book keeping of the term manipulations and not the underlaying category itself
 
     >>> I, O, C = from_operator(debug)
-    >>> a = ProcessedTerm(C('source'), CategoryOperations.ARROW, C('sink') )
-    >>> b = ProcessedTerm(C('source'), CategoryOperations.ARROW, C('sink') )
-    >>> c = ProcessedTerm(C('source'), CategoryOperations.ARROW, C('source') )
-    >>> d = ProcessedTerm(C('source'), CategoryOperations.ADD, C('sink') )
-    >>> e = ProcessedTerm(C('sink'), CategoryOperations.ARROW, C('sink') )
+    >>> a = ProcessedTerm(C('sink'), CategoryOperations.ARROW, C('source') )
+    >>> b = ProcessedTerm(C('sink'), CategoryOperations.ARROW, C('source') )
+    >>> c = ProcessedTerm(C('sink'), CategoryOperations.ARROW, C('sink') )
+    >>> d = ProcessedTerm(C('sink'), CategoryOperations.ADD, C('source') )
+    >>> e = ProcessedTerm(C('source'), CategoryOperations.ARROW, C('source') )
 
     >>> a == b == a == a
     True
@@ -77,29 +77,29 @@ class ProcessedTerm:
 
     def __init__(
             self,
-            source: IPrintableTerm = None,
+            sink: IPrintableTerm = None,
             operation: CategoryOperations = None,
-            sink: IPrintableTerm = None):
-        if None in [source, operation, sink]:
-            raise ValueError("these should not be none {}".format([source, operation, sink]))
-        self._source = source
+            source: IPrintableTerm = None):
+        if None in [sink, operation, source]:
+            raise ValueError("these should not be none {}".format([sink, operation, source]))
+        self._source = sink
         self._operation = operation
-        self._sink = sink
+        self._sink = source
 
     def __str__(self):
-        if not self.source.needs_parenthesis_on_print():
-            if not self.sink.needs_parenthesis_on_print():
-                return "{} {} {}".format(self.source, self.operation.value, self.sink)
-            return "{} {} ({})".format(self.source, self.operation.value, self.sink)
         if not self.sink.needs_parenthesis_on_print():
-            return "({}) {} {}".format(self.source, self.operation.value, self.sink)
-        return "({}) {} ({})".format(self.source, self.operation.value, self.sink)
+            if not self.source.needs_parenthesis_on_print():
+                return "{} {} {}".format(self.sink, self.operation.value, self.source)
+            return "{} {} ({})".format(self.sink, self.operation.value, self.source)
+        if not self.source.needs_parenthesis_on_print():
+            return "({}) {} {}".format(self.sink, self.operation.value, self.source)
+        return "({}) {} ({})".format(self.sink, self.operation.value, self.source)
 
     def __repr__(self):
         return str(self)
 
     @property
-    def source(self) -> IPrintableTerm:
+    def sink(self) -> IPrintableTerm:
         return self._source
 
     @property
@@ -107,13 +107,13 @@ class ProcessedTerm:
         return self._operation
 
     @property
-    def sink(self) -> IPrintableTerm:
+    def source(self) -> IPrintableTerm:
         return self._sink
 
     def __eq__(self, other):
         return isinstance(other, ProcessedTerm) and \
-            (self.source, self.operation.value, self.sink) == (other.source, other.operation.value, other.sink)
+            (self.sink, self.operation.value, self.source) == (other.sink, other.operation.value, other.source)
 
     def __hash__(self):
-        return (self.source, self.operation, self.sink).__hash__()
+        return (self.sink, self.operation, self.source).__hash__()
 

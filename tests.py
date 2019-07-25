@@ -12,10 +12,9 @@ if __name__ == '__main__':
         'ProcessedTerm': category_equations.ProcessedTerm,
         'IEquationTerm': category_equations.IEquationTerm,
         'EquationTerm': category_equations.EquationTerm,
-        'get_all_terms': category_equations.get_all_terms,
-        'get_tail_products': category_equations.get_tail_products,
-        'get_topmost_sums': category_equations.get_topmost_sums,
-        'get_topmost_tail_products': category_equations.get_topmost_tail_products}
+        'Get': category_equations.Get,
+        'Equal': category_equations.Equal,
+        'TermIs': category_equations.TermIs}
     
     #doctest.testfile(filename="operation.py", module_relative=True, package=category_equations, globs=globs)
     #doctest.testfile(filename="category.py", module_relative=True, package=category_equations, globs=globs)

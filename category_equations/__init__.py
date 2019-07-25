@@ -20,7 +20,9 @@ from .term import(
 
 
 from .analysis import (
-    get_all_terms, get_tail_products, get_topmost_sums, get_topmost_tail_products)
+    TermIs,
+    Get,
+    Equal)
 
 def debug(source, sink):
     print(source, '->', sink)
@@ -251,9 +253,8 @@ __all__ = [
     'Identity',
     'Zero',
     'Adder',
-    'get_all_terms',
-    'get_tail_products',
-    'get_topmost_sums',
-    'get_topmost_tail_products',
+    'TermIs',
+    'Get',
+    'Equal',
     'OperationsSet',
     'FreezedOperation']
