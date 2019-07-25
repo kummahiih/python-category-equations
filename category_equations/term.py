@@ -122,6 +122,40 @@ class EquationTerm(IEquationTerm):
 
 
 class Identity(EquationTerm):
+    """
+    >>> I, O, C = from_operator(debug)
+
+    >>> I == I
+    True
+    
+    >>> I == O
+    False
+    
+    >>> I == (I*I)
+    True
+    
+    >>> I == (I+I)
+    True
+    
+    >>> I ==(I-I)
+    False
+
+    >>> I == (I-O)
+    True
+    
+    >>> I ==(O*I)
+    False
+    
+    >>> I ==(O+I)
+    True
+    
+    >>> I ==(O-I)
+    False
+    
+    >>> I ==(O+O)
+    False
+    
+    """
 
     def __init__(self, operator: Callable = None):
         super().__init__(
@@ -152,6 +186,43 @@ class Identity(EquationTerm):
 
 
 class Zero(EquationTerm):
+    """
+    >>> I, O, C = from_operator(debug)
+
+    >>> (C(1) - C(1)) == O
+    True
+
+    >>> O ==(I)
+    False
+    
+    >>> O ==(O)
+    True
+    
+    >>> O ==(I*I)
+    False
+    
+    >>> O ==(I+I)
+    False
+    
+    >>> O ==(I-I)
+    True
+
+    >>> O ==(I-O)
+    False
+    
+    >>> O ==(O*I)
+    False
+    
+    >>> O ==(O+I)
+    False
+    
+    >>> O ==(O-I)
+    True
+    
+    >>> O ==(O+O)
+    True
+
+    """
 
     def __init__(self, operator: Callable = None):
         super().__init__(
