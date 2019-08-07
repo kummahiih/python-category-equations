@@ -285,6 +285,23 @@ class Adder(EquationTerm):
     def __str__(self):
         return "C({})".format(", ".join(map(str, self._items)))
 
+    def combine(self, adder):
+        if not isinstance(adder, Adder) or self.operator != adder.operator:
+            raise ValueError
+        items = set()
+        items.update(self._items)
+        items.update(adder._items)
+        return Adder(items = items, operator=self.operator)
+
+    def reduce_to_additions(self):
+        if len(self._items) == 0:
+            return Adder(items=set(), operator=self.operator)
+        items = list(self._items)
+        items.sort()
+        retuned = Adder(items=set([items[0]]), operator=self.operator)
+        for item in items[1:]:
+            retuned += Adder(items=set([item]), operator=self.operator)
+        return retuned
 
     def needs_parenthesis_on_print(self) -> bool:
         return False

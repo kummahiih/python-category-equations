@@ -13,7 +13,7 @@ with open('README.md', 'wt') as readme_file:
 
 setup(
     name='python-category-equations',
-    version='0.6.0',
+    version='0.7.0',
     description='python-category-equations',
     long_description=README,
     license="MIT",
@@ -23,7 +23,6 @@ setup(
     python_requires='~=3.6',
     classifiers=[
         'License :: OSI Approved :: MIT License',
-        'Programming Language :: Python :: 3.6']#,
-    #install_requires=['patternmatching==3.0.1']
+        'Programming Language :: Python :: 3.6']
 )
     
