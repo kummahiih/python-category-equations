@@ -629,6 +629,20 @@ def simplify(term: IEquationTerm, max_iterations = 1024, equation_map=None):
     (C(1) + C(2)) * C(3)
     C(1, 2) * C(3)
 
+    >>> c = C(1,2) * C(3,4) * C(5) + C(1,2) * C(5)
+    >>> simplified, path = simplify(c, 300, m)
+    >>> simplified
+    C(1, 2) * (C(3, 4) + I) * C(5)
+    >>> for p in path:
+    ...    print(p)
+    C(1, 2) * C(3, 4) * C(5) + C(1, 2) * C(5)
+    (C(1, 2) * C(3, 4) * I + C(1, 2) * I) * C(5)
+    (C(1, 2) * C(3, 4) + C(1, 2) * I) * C(5)
+    (C(1, 2) * C(3, 4) + C(1, 2)) * C(5)
+    C(1, 2) * (I * C(3, 4) + I) * C(5)
+    C(1, 2) * (C(3, 4) + I) * C(5)
+
+
     """
     cached_term = equation_map.get_cached(term)
 
