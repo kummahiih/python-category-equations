@@ -14,11 +14,13 @@ if __name__ == '__main__':
         'EquationTerm': category_equations.EquationTerm,
         'Get': category_equations.Get,
         'Equal': category_equations.Equal,
+        'EquationMap': category_equations.EquationMap,
+        'simplify': category_equations.simplify,
+        'get_route': category_equations.get_route,
         'TermIs': category_equations.TermIs}
     
-    #doctest.testfile(filename="operation.py", module_relative=True, package=category_equations, globs=globs)
-    #doctest.testfile(filename="category.py", module_relative=True, package=category_equations, globs=globs)
-    #doctest.testfile(filename="terms.py", module_relative=True, package=category_equations, globs=globs)
+    doctest.testfile(filename="operation.py", module_relative=True, package=category_equations, globs=globs)
+    doctest.testfile(filename="category.py", module_relative=True, package=category_equations, globs=globs)
     doctest.testfile(filename="__init__.py", module_relative=True, package=category_equations, globs=globs)
     doctest.testfile(filename="term.py", module_relative=True, package=category_equations, globs=globs)
     doctest.testfile(filename="analysis.py", module_relative=True, package=category_equations, globs=globs)

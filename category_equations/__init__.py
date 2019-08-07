@@ -22,7 +22,10 @@ from .term import(
 from .analysis import (
     TermIs,
     Get,
-    Equal)
+    Equal,
+    EquationMap,
+    simplify,
+    get_route)
 
 def debug(source, sink):
     print(source, '->', sink)
@@ -230,6 +233,46 @@ Note that the comparison wont work without the O -term because the sinks differ:
     >>> C(1) * C(2) * C(4) +  C(3) * C(4) == C(1) * ( C(2) + O * C(3) ) * C(4)
     False
 
+## Equation solving and minimizations
+
+The module contains also (quite unefficient) simplify -method, which can be used to expression minimization:
+
+    >>> I, O, C = from_operator(debug)
+    >>> m = EquationMap(I, O, C)
+    >>> a = C(1) + C(2)
+    >>> simplify(a, 300, m)
+    (C(1, 2), [C(1) + C(2), C(1, 2)])
+
+    >>> b = C(1) * C(3) + C(2) * C(3)
+    >>> simplified, path = simplify(b, 100, m)
+    >>> simplified
+    C(1, 2) * C(3)
+    >>> for p in path:
+    ...    print(p)
+    C(1) * C(3) + C(2) * C(3)
+    (C(1) * I + C(2) * I) * C(3)
+    (C(1) + C(2) * I) * C(3)
+    (C(1) + C(2)) * C(3)
+    C(1, 2) * C(3)
+
+
+For proofs use the get_route:
+
+    >>> I, O, C = from_operator(debug)
+    >>> m = EquationMap(I, O, C)
+    >>> a = C(1) * C(3) + C(2) * C(3)
+    >>> b = C(1, 2) * C(3)
+    >>> shortest, path = get_route(a,b, 100, m)
+    >>> for p in path:
+    ...    print(p)
+    C(1) * C(3) + C(2) * C(3)
+    C(1) * C(3) + C(2) * I * C(3)
+    (C(1) * I + C(2) * I) * C(3)
+    (C(1) + C(2) * I) * C(3)
+    (C(1) + C(2)) * C(3)
+    C(1, 2) * C(3)
+
+
     """
 
     _I, _O = get_I_and_O(operation)
@@ -256,5 +299,8 @@ __all__ = [
     'TermIs',
     'Get',
     'Equal',
+    'EquationMap',
+    'simplify',
+    'get_route',
     'OperationsSet',
     'FreezedOperation']
