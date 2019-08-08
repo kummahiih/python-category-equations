@@ -36,7 +36,9 @@ def from_operator(operation=debug):
     """
 # python-category-equations
 
-With the tools provided here you can create category like equations for the given operator.
+Category is way to represent and generate directed networks by using sinks, 
+sources and connections from sources to sinks. With the tools provided here you can
+create and simplify category like equations for the given connector operator.
 On the equations the underlaying '+' and '-' operations are basic set operations
 called union and discard  and the multiplication operator '*' connects sources to sinks.
 The equation system also has a Identity 'I' term and zerO -like termination term 'O'.
