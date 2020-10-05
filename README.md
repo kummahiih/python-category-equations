@@ -4,15 +4,15 @@
 Category is way to represent and generate directed networks by using sinks, 
 sources and connections from sources to sinks. With the tools provided here you can
 create and simplify category like equations for the given connector operator.
-On the equations the underlaying '+' and '-' operations are basic set operations
-called union and discard  and the multiplication operator '*' connects sources to sinks.
-The equation system also has a Identity 'I' term and zerO -like termination term 'O'.
+On the equations the underlying `+` and `-` operations are basic set operations
+called union and discard. The multiplication operator `*` connects sources to sinks.
+The equation system also has a Identity `I` term and zerO -like termination term `O`.
 For futher details go https://en.wikipedia.org/wiki/Category_(mathematics)#Definition
 
 ## Usage
 
 
-Here our connector operation is print function called 'debug' which
+Here our connector operation is print function called `debug` which
 prints an arrow between two objects:
 
     >>> debug('a', 'b')
@@ -24,7 +24,7 @@ prints an arrow between two objects:
     >>> debug('a', 'a')
     a -> a
 
-Get I and O singletons and class C, which use previously defined debug -function.
+Get I and O singletons and class C, which use previously defined `debug` -function.
 
     >>> I, O, C = from_operator(debug)
     >>> I == I
@@ -86,7 +86,7 @@ Or
     >>> (C(1) * C(2, I)).sources
     {1, 2}
 
-And writing C(1,2) instead of C(1) + C(2) works with multiplication too:
+And writing `C(1,2)` instead of `C(1) + C(2)` works with multiplication too:
 
     >>> C(1,2) * C(3,4) == (C(1) + C(2)) * (C(3) + C(4))
     True
@@ -134,7 +134,7 @@ The right form would have been:
     True
 
 
-The identity I and zero O work together like usual:
+The identity `I` and zero `O` work together like usual:
 
     >>> I * I == I
     True
@@ -142,7 +142,7 @@ The identity I and zero O work together like usual:
     True
 
 
-Identity 'I' works as a tool for equation simplifying.
+Identity `I` works as a tool for equation simplifying.
 For example:
 
     >>> C(1,2) * C(3,4) * C(5) + C(1,2) * C(5) == C(1,2) * ( C(3,4) + I ) * C(5)
@@ -223,7 +223,7 @@ The module contains also (quite unefficient) simplify -method, which can be used
     C(1, 2) * C(3)
 
 
-For proofs use the get_route:
+For proofs use the `get_route`:
 
     >>> I, O, C = from_operator(debug)
     >>> m = EquationMap(I, O, C)
