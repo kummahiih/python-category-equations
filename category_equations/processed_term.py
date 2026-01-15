@@ -34,7 +34,7 @@ class IPrintableTerm(Category, metaclass=abc.ABCMeta):
 
 class ProcessedTerm:
     """
-    ProcessedTerm class is for the book keeping of the term manipulations and not the underlaying category itself
+    ProcessedTerm class is for the book keeping of the term manipulations and not the underlying category itself
 
     >>> I, O, C = from_operator(debug)
     >>> a = ProcessedTerm(C('sink'), CategoryOperations.ARROW, C('source') )

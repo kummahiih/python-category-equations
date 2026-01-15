@@ -298,10 +298,10 @@ class Adder(EquationTerm):
             return Adder(items=set(), operator=self.operator)
         items = list(self._items)
         items.sort()
-        retuned = Adder(items=set([items[0]]), operator=self.operator)
+        returned = Adder(items=set([items[0]]), operator=self.operator)
         for item in items[1:]:
-            retuned += Adder(items=set([item]), operator=self.operator)
-        return retuned
+            returned += Adder(items=set([item]), operator=self.operator)
+        return returned
 
     def needs_parenthesis_on_print(self) -> bool:
         return False

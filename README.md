@@ -7,7 +7,7 @@ create and simplify category like equations for the given connector operator.
 On the equations the underlying `+` and `-` operations are basic set operations
 called union and discard. The multiplication operator `*` connects sources to sinks.
 The equation system also has a Identity `I` term and zerO -like termination term `O`.
-For futher details go https://en.wikipedia.org/wiki/Category_(mathematics)#Definition
+For further details go https://en.wikipedia.org/wiki/Category_(mathematics)#Definition
 
 ## Usage
 
@@ -195,14 +195,14 @@ For example:
     True
 
 
-Note that the comparison wont work without the O -term because the sinks differ:
+Note that the comparison won't work without the O -term because the sinks differ:
 
     >>> C(1) * C(2) * C(4) +  C(3) * C(4) == C(1) * ( C(2) + O * C(3) ) * C(4)
     False
 
 ## Equation solving and minimizations
 
-The module contains also (quite unefficient) simplify -method, which can be used to expression minimization:
+The module contains also (quite inefficient) simplify -method, which can be used to expression minimization:
 
     >>> I, O, C = from_operator(debug)
     >>> m = EquationMap(I, O, C)
