@@ -13,7 +13,7 @@ with open('README.md', 'wt') as readme_file:
 
 setup(
     name='python-category-equations',
-    version='0.7.3',
+    version='0.7.4',
     description='python-category-equations',
     long_description=README,
     license="MIT",
