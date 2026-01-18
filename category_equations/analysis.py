@@ -1,5 +1,5 @@
 """
-@copyright: 2018 by Pauli Rikula <pauli.rikula@gmail.com>
+@copyright: 2018 - 2026 by Pauli Rikula <pauli.rikula@gmail.com>
 
 @license: MIT <https://opensource.org/license/mit>
 

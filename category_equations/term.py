@@ -110,8 +110,6 @@ class EquationTerm(IEquationTerm):
                 new_sinks.add(v)
 
         operations = self.operations.union(anext.operations).union(new_operations)
-        #print operations
-        #print len(operations)
         result = MediateTerm(
             operator=anext.operator,
             sinks=new_sinks,
