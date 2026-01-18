@@ -1,7 +1,7 @@
 """
 @copyright: 2010 - 2018 by Pauli Rikula <pauli.rikula@gmail.com>
 
-@license: MIT <http://www.opensource.org/licenses/mit-license.php>
+@license: MIT <https://opensource.org/license/mit>
 
 
 """
