@@ -24,7 +24,8 @@ class CategoryOperations(enum.Enum):
 
 
 class IPrintableTerm(Category, metaclass=abc.ABCMeta):
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def needs_parenthesis_on_print(self) -> bool:
         raise NotImplementedError
 

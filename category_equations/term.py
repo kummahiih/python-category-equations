@@ -14,7 +14,8 @@ from .processed_term import CategoryOperations, ProcessedTerm, IPrintableTerm
 
 
 class IEquationTerm(IPrintableTerm, metaclass=abc.ABCMeta):
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def processed_term(self) -> ProcessedTerm:
         raise NotImplementedError
 
