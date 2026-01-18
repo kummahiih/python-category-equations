@@ -3,12 +3,8 @@
    @license: MIT <http://www.opensource.org/licenses/mit-license.php>
 """
 
-import copy
 import enum
 import abc
-from typing import Set, List, Callable
-
-from .operation import FreezedOperation, OperationsSet
 from .category import Category
 
 

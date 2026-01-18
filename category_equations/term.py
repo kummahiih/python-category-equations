@@ -4,11 +4,10 @@
 """
 
 import copy
-import enum
 import abc
-from typing import Set, List, Callable
+from typing import Set, Callable
 
-from .operation import FreezedOperation, OperationsSet
+from .operation import OperationsSet
 from .category import Category
 from .processed_term import CategoryOperations, ProcessedTerm, IPrintableTerm
 

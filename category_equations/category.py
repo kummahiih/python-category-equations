@@ -3,11 +3,10 @@
    @license: MIT <http://www.opensource.org/licenses/mit-license.php>
 """
 
-import enum
 import abc
-from typing import Set, List, Callable
+from typing import Set, Callable
 
-from .operation import FreezedOperation, OperationsSet
+from .operation import OperationsSet
 
 class Category(metaclass=abc.ABCMeta):
     def __init__(
@@ -60,11 +59,13 @@ class Category(metaclass=abc.ABCMeta):
             self.sources == other.sources and \
             self.operations == other.operations
 
-    @abc.abstractclassmethod
+    @classmethod
+    @abc.abstractmethod
     def is_identity(self) -> bool:
         raise NotImplementedError
 
-    @abc.abstractclassmethod
+    @classmethod
+    @abc.abstractmethod
     def is_zero(self)  -> bool:
         raise NotImplementedError
 
@@ -72,7 +73,8 @@ class Category(metaclass=abc.ABCMeta):
         for frozen in self.operations.as_sorted_list:
             frozen.evaluate()
 
-    @abc.abstractclassmethod
+    @classmethod
+    @abc.abstractmethod
     def __str__(self) -> str:
         raise NotImplementedError
 
