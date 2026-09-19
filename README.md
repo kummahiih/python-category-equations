@@ -1,4 +1,3 @@
-
 # python-category-equations
 
 Category is way to represent and generate directed networks by using sinks, 
@@ -240,4 +239,6 @@ For proofs use the `get_route`:
     C(1, 2) * C(3)
 
 
-    
+## Lean formalization
+
+A Set + products reading of the identity `f1 ▷ (f2, I) ▷ f3` (as equality of functions `A → C × C`) is formalized under [lean/](lean/). The lemma is `pipe_branch_mapPair`. This does not claim that the Python algebra or solver is verified.
