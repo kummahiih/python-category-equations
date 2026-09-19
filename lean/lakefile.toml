@@ -1,0 +1,6 @@
+name = "category-equations"
+version = "0.1.0"
+defaultTargets = ["CategoryEquations"]
+
+[[lean_lib]]
+name = "CategoryEquations"
