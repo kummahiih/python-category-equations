@@ -14,3 +14,6 @@ category_equations/__pycache__/
 # due to using tox and pytest
 .tox
 .cache
+
+# Lake
+.lake/

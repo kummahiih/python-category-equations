@@ -240,4 +240,13 @@ For proofs use the `get_route`:
     C(1, 2) * C(3)
 
 
-    
+## Lean slice
+
+A small Lean 4 glossary lives in `lean/`. It is a **Set + products** reading of
+`f1 ⊳ (f2, I) ⊳ f3`, not a verification of this Python `*` algebra. See `lean/README.md`.
+
+From the repository root:
+
+    lake build
+
+Reservoir looks at the root `lake-manifest.json` plus `lakefile.toml`.

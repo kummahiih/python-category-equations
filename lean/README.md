@@ -8,6 +8,12 @@
 - The `I` appearing here is the ordinary identity function `id`, **not** the singleton identity
   term `I` of the Python algebra.
 
+Pinned to Lean `v4.34.0`. No Mathlib. Build from the **repository root**:
+
+```bash
+lake build
+```
+
 The Lean file defines safe combinators (`I`, `pipe`/`⊳`, `branch`, `mapPair`) that avoid
 clashing with Lean’s built-in pipe and product notations, and proves the corresponding
 equality of functions `A → C × C`.

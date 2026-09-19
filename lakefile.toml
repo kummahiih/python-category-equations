@@ -1,0 +1,12 @@
+name = "category_equations"
+version = "0.1.0"
+srcDir = "lean"
+description = "Set+products reading of a pipe/branch identity related to python-category-equations"
+keywords = ["category", "equations", "pipe", "lean"]
+license = "MIT"
+readmeFile = "lean/README.md"
+reservoir = true
+defaultTargets = ["CategoryEquations"]
+
+[[lean_lib]]
+name = "CategoryEquations"
