@@ -15,3 +15,11 @@ def branch {α β γ : Type*} (f : α → β) (g : α → γ) : α → β × γ 
 
 def mapPair {α β : Type*} (f : α → β) : α × α → β × β :=
   fun p => (f p.1, f p.2)
+
+/-- The Set-reading identity: f1 ⊳ (f2, I) ⊳ f3 = (f1 ⊳ f2 ⊳ f3, f1 ⊳ f3). -/
+theorem pipe_branch_mapPair
+    {A B C : Type*} (f1 : A → B) (f2 : B → B) (f3 : B → C) :
+    pipe (pipe f1 (branch f2 I)) (mapPair f3) =
+      branch (pipe (pipe f1 f2) f3) (pipe f1 f3) := by
+  funext a
+  rfl
